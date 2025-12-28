@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>エターナルウミガメのスープ - 無限水平思考クイズ</title>
+  <meta name="description" content="AIが無限に生成する水平思考クイズ「ウミガメのスープ」。質問を重ねて真相を解き明かそう！">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <!-- Background Animation -->
+  <div class="bg-animation" id="bg-animation"></div>
+
+  <div class="container">
+    <!-- Start Screen -->
+    <div class="screen active" id="start-screen">
+      <div class="glass-card">
+        <div class="logo">
+          <div class="turtle">🐢</div>
+        </div>
+        <h1 class="title">エターナル<br>ウミガメのスープ</h1>
+        <p class="subtitle">
+          AIが無限に生み出す水平思考クイズ。<br>
+          「はい」「いいえ」の質問を重ねて<br>
+          謎の真相を解き明かせ！
+        </p>
+
+        <div class="difficulty-label">🎯 難易度を選択</div>
+        <div class="difficulty-selector">
+          <button class="difficulty-btn easy active" data-difficulty="easy">🌱 初級</button>
+          <button class="difficulty-btn normal" data-difficulty="normal">🌊 中級</button>
+          <button class="difficulty-btn hard" data-difficulty="hard">🔥 上級</button>
+        </div>
+
+        <button class="start-btn" id="start-btn">🎮 ゲームスタート</button>
+      </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div class="screen" id="game-screen">
+      <div class="header">
+        <div class="game-title">🐢 ウミガメのスープ</div>
+        <div class="question-count">質問回数: <span id="question-count">0</span></div>
+      </div>
+
+      <div class="problem-card">
+        <div class="problem-label">📜 問題</div>
+        <p class="problem-text" id="problem-text">読み込み中...</p>
+      </div>
+
+      <div class="input-area">
+        <input type="text" class="question-input" id="question-input" placeholder="質問を入力してください（例：その人は男性ですか？）">
+        <button class="send-btn" id="send-btn">🚀</button>
+      </div>
+
+      <div class="history-section">
+        <div class="history-label">💬 質問履歴</div>
+        <div class="history-list" id="history-list">
+          <!-- History items will be added here -->
+        </div>
+      </div>
+
+      <div class="action-buttons">
+        <button class="action-btn" id="hint-btn">💡 ヒント</button>
+        <button class="action-btn primary" id="answer-btn">✨ 正解を推理する</button>
+        <button class="action-btn" id="giveup-btn">🏳️ ギブアップ</button>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="screen" id="result-screen">
+      <div class="glass-card result-card">
+        <div class="result-icon" id="result-icon">🎉</div>
+        <h2 class="result-title" id="result-title">正解！</h2>
+
+        <div class="answer-section">
+          <div class="answer-label">📖 真相</div>
+          <p class="answer-text" id="answer-text"></p>
+        </div>
+
+        <div class="stats">
+          <div class="stat-item">
+            <div class="stat-value" id="final-question-count">0</div>
+            <div class="stat-label">質問回数</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="yes-count">0</div>
+            <div class="stat-label">はい</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="no-count">0</div>
+            <div class="stat-label">いいえ</div>
+          </div>
+        </div>
+
+        <button class="next-btn" id="next-btn">🔄 次の問題へ</button>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="/main.js"></script>
+</body>
+
+</html>

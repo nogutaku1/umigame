@@ -9,15 +9,820 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #0a1628;
+      --bg-secondary: #0f2744;
+      --accent: #00d9ff;
+      --accent-glow: rgba(0, 217, 255, 0.3);
+      --text-primary: #ffffff;
+      --text-secondary: rgba(255, 255, 255, 0.7);
+      --glass: rgba(255, 255, 255, 0.08);
+      --glass-border: rgba(255, 255, 255, 0.15);
+      --yes-color: #4ade80;
+      --no-color: #f87171;
+      --maybe-color: #fbbf24;
+      --correct-color: #a855f7;
+      --error-color: #ef4444;
+    }
+
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, #1a3a5c 100%);
+      min-height: 100vh;
+      color: var(--text-primary);
+      overflow-x: hidden;
+    }
+
+    /* Animated background */
+    .bg-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .bubble {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, rgba(0, 217, 255, 0.2), transparent);
+      animation: float 20s infinite ease-in-out;
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(100vh) rotate(0deg);
+        opacity: 0;
+      }
+
+      10% {
+        opacity: 0.6;
+      }
+
+      90% {
+        opacity: 0.6;
+      }
+
+      100% {
+        transform: translateY(-100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      background: var(--error-color);
+      color: white;
+      padding: 16px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      z-index: 1000;
+      opacity: 0;
+      transition: all 0.3s ease;
+      max-width: 90%;
+      text-align: center;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .toast.success {
+      background: var(--yes-color);
+      color: var(--bg-primary);
+    }
+
+    /* Container */
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Glass card */
+    .glass-card {
+      background: var(--glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Screens */
+    .screen {
+      display: none;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .screen.active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Setup & Start Screen */
+    #setup-screen,
+    #start-screen {
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      text-align: center;
+    }
+
+    .logo {
+      margin-bottom: 20px;
+    }
+
+    .logo .turtle {
+      font-size: 80px;
+      animation: swim 3s ease-in-out infinite;
+    }
+
+    @keyframes swim {
+
+      0%,
+      100% {
+        transform: translateX(0) rotate(-5deg);
+      }
+
+      50% {
+        transform: translateX(10px) rotate(5deg);
+      }
+    }
+
+    .title {
+      font-size: clamp(2rem, 8vw, 3.5rem);
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--accent), #a855f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 16px;
+      text-shadow: 0 0 60px var(--accent-glow);
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      margin-bottom: 30px;
+      line-height: 1.8;
+    }
+
+    /* API Key Section */
+    .api-key-section {
+      margin-bottom: 24px;
+      text-align: left;
+    }
+
+    .api-key-label {
+      display: block;
+      font-size: 0.9rem;
+      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .api-key-input {
+      width: 100%;
+      background: var(--glass);
+      border: 2px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-size: 1rem;
+      color: var(--text-primary);
+      font-family: monospace;
+      transition: all 0.3s ease;
+    }
+
+    .api-key-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .api-key-hint {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-top: 12px;
+      line-height: 1.6;
+    }
+
+    .api-key-hint a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .api-key-hint a:hover {
+      text-decoration: underline;
+    }
+
+    /* Difficulty Selector */
+    .difficulty-selector {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    .difficulty-btn {
+      padding: 12px 24px;
+      border: 2px solid var(--glass-border);
+      background: var(--glass);
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: inherit;
+    }
+
+    .difficulty-btn:hover {
+      border-color: var(--accent);
+      color: var(--text-primary);
+    }
+
+    .difficulty-btn.active {
+      background: linear-gradient(135deg, var(--accent), #0099cc);
+      border-color: transparent;
+      color: var(--bg-primary);
+      box-shadow: 0 4px 20px var(--accent-glow);
+    }
+
+    .difficulty-btn.easy.active {
+      background: linear-gradient(135deg, var(--yes-color), #22c55e);
+      box-shadow: 0 4px 20px rgba(74, 222, 128, 0.3);
+    }
+
+    .difficulty-btn.normal.active {
+      background: linear-gradient(135deg, var(--accent), #0099cc);
+    }
+
+    .difficulty-btn.hard.active {
+      background: linear-gradient(135deg, var(--no-color), #dc2626);
+      box-shadow: 0 4px 20px rgba(248, 113, 113, 0.3);
+    }
+
+    .difficulty-label {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .start-btn,
+    .primary-btn {
+      background: linear-gradient(135deg, var(--accent), #0099cc);
+      border: none;
+      padding: 18px 48px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--bg-primary);
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 30px var(--accent-glow);
+      font-family: inherit;
+    }
+
+    .start-btn:hover:not(:disabled),
+    .primary-btn:hover:not(:disabled) {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 8px 40px var(--accent-glow);
+    }
+
+    .start-btn:disabled,
+    .primary-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .settings-btn {
+      background: transparent;
+      border: 2px solid var(--glass-border);
+      padding: 12px 24px;
+      font-size: 1rem;
+      color: var(--text-secondary);
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: inherit;
+      margin-top: 16px;
+    }
+
+    .settings-btn:hover {
+      border-color: var(--accent);
+      color: var(--text-primary);
+    }
+
+    /* Game Screen */
+    #game-screen {
+      padding-top: 20px;
+      gap: 20px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      background: var(--glass);
+      border-radius: 16px;
+      border: 1px solid var(--glass-border);
+    }
+
+    .game-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .question-count {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .question-count span {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    /* Problem Card */
+    .problem-card {
+      background: linear-gradient(135deg, rgba(0, 217, 255, 0.1), rgba(168, 85, 247, 0.1));
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .problem-card::before {
+      content: '❓';
+      position: absolute;
+      top: -20px;
+      right: -20px;
+      font-size: 100px;
+      opacity: 0.1;
+    }
+
+    .problem-label {
+      font-size: 0.85rem;
+      color: var(--accent);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+    }
+
+    .problem-text {
+      font-size: 1.15rem;
+      line-height: 1.9;
+      color: var(--text-primary);
+    }
+
+    /* Input Area */
+    .input-area {
+      display: flex;
+      gap: 12px;
+    }
+
+    .question-input {
+      flex: 1;
+      background: var(--glass);
+      border: 2px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 16px 20px;
+      font-size: 1rem;
+      color: var(--text-primary);
+      font-family: inherit;
+      transition: all 0.3s ease;
+    }
+
+    .question-input::placeholder {
+      color: var(--text-secondary);
+    }
+
+    .question-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .send-btn {
+      background: linear-gradient(135deg, var(--accent), #0099cc);
+      border: none;
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      cursor: pointer;
+      font-size: 1.5rem;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .send-btn:hover:not(:disabled) {
+      transform: scale(1.05);
+      box-shadow: 0 4px 20px var(--accent-glow);
+    }
+
+    .send-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* History */
+    .history-section {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .history-label {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .history-list {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding-right: 8px;
+      max-height: 300px;
+    }
+
+    .history-list::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .history-list::-webkit-scrollbar-track {
+      background: var(--glass);
+      border-radius: 3px;
+    }
+
+    .history-list::-webkit-scrollbar-thumb {
+      background: var(--accent);
+      border-radius: 3px;
+    }
+
+    .history-item {
+      display: flex;
+      gap: 12px;
+      padding: 14px;
+      background: var(--glass);
+      border-radius: 12px;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .history-q {
+      flex: 1;
+      font-size: 0.95rem;
+      color: var(--text-primary);
+    }
+
+    .history-a {
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+
+    .history-a.yes {
+      background: rgba(74, 222, 128, 0.2);
+      color: var(--yes-color);
+    }
+
+    .history-a.no {
+      background: rgba(248, 113, 113, 0.2);
+      color: var(--no-color);
+    }
+
+    .history-a.maybe {
+      background: rgba(251, 191, 36, 0.2);
+      color: var(--maybe-color);
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      flex: 1;
+      min-width: 140px;
+      padding: 14px 20px;
+      border: 2px solid var(--glass-border);
+      background: var(--glass);
+      color: var(--text-primary);
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: inherit;
+    }
+
+    .action-btn:hover {
+      border-color: var(--accent);
+      background: rgba(0, 217, 255, 0.1);
+    }
+
+    .action-btn.primary {
+      background: linear-gradient(135deg, var(--correct-color), #7c3aed);
+      border: none;
+      color: white;
+    }
+
+    .action-btn.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(168, 85, 247, 0.4);
+    }
+
+    /* Result Screen */
+    #result-screen {
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      text-align: center;
+    }
+
+    .result-card {
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .result-icon {
+      font-size: 80px;
+      margin-bottom: 20px;
+      animation: bounce 1s ease infinite;
+    }
+
+    @keyframes bounce {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    .result-title {
+      font-size: 2rem;
+      font-weight: 900;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, var(--yes-color), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .result-title.giveup {
+      background: linear-gradient(135deg, var(--maybe-color), var(--no-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .answer-section {
+      background: var(--glass);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+      text-align: left;
+    }
+
+    .answer-label {
+      font-size: 0.85rem;
+      color: var(--accent);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+    }
+
+    .answer-text {
+      font-size: 1.1rem;
+      line-height: 1.8;
+      color: var(--text-primary);
+    }
+
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      margin-bottom: 32px;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--accent);
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .next-btn {
+      background: linear-gradient(135deg, var(--accent), #0099cc);
+      border: none;
+      padding: 16px 40px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--bg-primary);
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 30px var(--accent-glow);
+      font-family: inherit;
+    }
+
+    .next-btn:hover {
+      transform: translateY(-3px) scale(1.05);
+    }
+
+    /* Loading */
+    .loading-dots {
+      display: inline-flex;
+      gap: 4px;
+    }
+
+    .loading-dots span {
+      width: 8px;
+      height: 8px;
+      background: currentColor;
+      border-radius: 50%;
+      animation: loadingDot 1.4s infinite ease-in-out both;
+    }
+
+    .loading-dots span:nth-child(1) {
+      animation-delay: -0.32s;
+    }
+
+    .loading-dots span:nth-child(2) {
+      animation-delay: -0.16s;
+    }
+
+    @keyframes loadingDot {
+
+      0%,
+      80%,
+      100% {
+        transform: scale(0);
+      }
+
+      40% {
+        transform: scale(1);
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .container {
+        padding: 12px;
+      }
+
+      .glass-card {
+        padding: 20px;
+      }
+
+      .problem-card {
+        padding: 20px;
+      }
+
+      .title {
+        font-size: 2rem;
+      }
+
+      .input-area {
+        flex-direction: column;
+      }
+
+      .send-btn {
+        width: 100%;
+        height: 50px;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+      }
+
+      .action-btn {
+        width: 100%;
+      }
+
+      .stats {
+        gap: 20px;
+      }
+    }
+  </style>
 </head>
 
 <body>
   <!-- Background Animation -->
   <div class="bg-animation" id="bg-animation"></div>
 
+  <!-- Toast Notification -->
+  <div class="toast" id="toast"></div>
+
   <div class="container">
+    <!-- API Key Setup Screen -->
+    <div class="screen active" id="setup-screen">
+      <div class="glass-card">
+        <div class="logo">
+          <div class="turtle">🐢</div>
+        </div>
+        <h1 class="title">エターナル<br>ウミガメのスープ</h1>
+        <p class="subtitle">
+          AIが無限に生み出す水平思考クイズ。<br>
+          プレイするにはOpenAI APIキーが必要です。
+        </p>
+
+        <div class="api-key-section">
+          <label class="api-key-label" for="api-key-input">🔑 OpenAI APIキー</label>
+          <input type="password" class="api-key-input" id="api-key-input" placeholder="sk-...">
+          <p class="api-key-hint">
+            <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">OpenAI</a>でAPIキーを取得できます。<br>
+            キーはブラウザに安全に保存され、外部に送信されません。
+          </p>
+        </div>
+
+        <button class="start-btn" id="save-api-key-btn">💾 保存してゲームへ</button>
+      </div>
+    </div>
+
     <!-- Start Screen -->
-    <div class="screen active" id="start-screen">
+    <div class="screen" id="start-screen">
       <div class="glass-card">
         <div class="logo">
           <div class="turtle">🐢</div>
@@ -37,6 +842,7 @@
         </div>
 
         <button class="start-btn" id="start-btn">🎮 ゲームスタート</button>
+        <button class="settings-btn" id="settings-btn">⚙️ APIキー設定</button>
       </div>
     </div>
 
@@ -101,7 +907,474 @@
       </div>
     </div>
   </div>
-  <script type="module" src="/src/main.js"></script>
+
+  <script>
+    // API Configuration
+    const API_URL = 'https://api.openai.com/v1/chat/completions';
+    const STORAGE_KEY = 'umigame_api_key';
+
+    // Game State
+    let gameState = {
+      apiKey: '',
+      problem: '',
+      answer: '',
+      questionCount: 0,
+      yesCount: 0,
+      noCount: 0,
+      history: [],
+      isLoading: false,
+      difficulty: 'easy'
+    };
+
+    // Difficulty configurations
+    const difficultyConfig = {
+      easy: {
+        label: '初級',
+        prompt: `【難易度：初級】
+- シンプルで分かりやすい状況
+- 論理的な飛躍が少ない
+- 5〜10回程度の質問で解ける
+- 日常的なシチュエーション`
+      },
+      normal: {
+        label: '中級',
+        prompt: `【難易度：中級】
+- やや複雑な状況設定
+- 少しひねりのある展開
+- 10〜20回程度の質問で解ける
+- 意外性のある真相`
+      },
+      hard: {
+        label: '上級',
+        prompt: `【難易度：上級】
+- 非常に不可解で複雑な状況
+- 大きな発想の転換が必要
+- 20回以上の質問が必要になることも
+- 驚きの真相、哲学的・心理的な深み`
+      }
+    };
+
+    // DOM Elements
+    const screens = {
+      setup: document.getElementById('setup-screen'),
+      start: document.getElementById('start-screen'),
+      game: document.getElementById('game-screen'),
+      result: document.getElementById('result-screen')
+    };
+
+    const elements = {
+      apiKeyInput: document.getElementById('api-key-input'),
+      saveApiKeyBtn: document.getElementById('save-api-key-btn'),
+      settingsBtn: document.getElementById('settings-btn'),
+      startBtn: document.getElementById('start-btn'),
+      problemText: document.getElementById('problem-text'),
+      questionInput: document.getElementById('question-input'),
+      sendBtn: document.getElementById('send-btn'),
+      questionCount: document.getElementById('question-count'),
+      historyList: document.getElementById('history-list'),
+      hintBtn: document.getElementById('hint-btn'),
+      answerBtn: document.getElementById('answer-btn'),
+      giveupBtn: document.getElementById('giveup-btn'),
+      resultIcon: document.getElementById('result-icon'),
+      resultTitle: document.getElementById('result-title'),
+      answerText: document.getElementById('answer-text'),
+      finalQuestionCount: document.getElementById('final-question-count'),
+      yesCount: document.getElementById('yes-count'),
+      noCount: document.getElementById('no-count'),
+      nextBtn: document.getElementById('next-btn'),
+      toast: document.getElementById('toast')
+    };
+
+    // Toast notification
+    function showToast(message, isSuccess = false) {
+      elements.toast.textContent = message;
+      elements.toast.className = 'toast show' + (isSuccess ? ' success' : '');
+      setTimeout(() => {
+        elements.toast.classList.remove('show');
+      }, 3000);
+    }
+
+    // Initialize background animation
+    function initBgAnimation() {
+      const container = document.getElementById('bg-animation');
+      if (!container) return;
+      for (let i = 0; i < 15; i++) {
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        const size = Math.random() * 100 + 50;
+        bubble.style.width = `${size}px`;
+        bubble.style.height = `${size}px`;
+        bubble.style.left = `${Math.random() * 100}%`;
+        bubble.style.animationDuration = `${Math.random() * 20 + 15}s`;
+        bubble.style.animationDelay = `${Math.random() * 10}s`;
+        container.appendChild(bubble);
+      }
+    }
+
+    // Show screen
+    function showScreen(screenName) {
+      Object.values(screens).forEach(screen => screen?.classList.remove('active'));
+      screens[screenName]?.classList.add('active');
+    }
+
+    // Load API key from storage
+    function loadApiKey() {
+      const savedKey = localStorage.getItem(STORAGE_KEY);
+      if (savedKey) {
+        gameState.apiKey = savedKey;
+        showScreen('start');
+      } else {
+        showScreen('setup');
+      }
+    }
+
+    // Save API key
+    function saveApiKey() {
+      const key = elements.apiKeyInput.value.trim();
+      if (!key) {
+        showToast('APIキーを入力してください');
+        return;
+      }
+      if (!key.startsWith('sk-')) {
+        showToast('無効なAPIキー形式です（sk-で始まる必要があります）');
+        return;
+      }
+      gameState.apiKey = key;
+      localStorage.setItem(STORAGE_KEY, key);
+      showToast('APIキーを保存しました！', true);
+      showScreen('start');
+    }
+
+    // Call OpenAI API
+    async function callOpenAI(prompt, systemPrompt = '') {
+      if (!gameState.apiKey) {
+        throw new Error('APIキーが設定されていません');
+      }
+
+      const messages = [];
+      if (systemPrompt) {
+        messages.push({ role: 'system', content: systemPrompt });
+      }
+      messages.push({ role: 'user', content: prompt });
+
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${gameState.apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o',
+          messages: messages,
+          temperature: 0.8,
+          max_tokens: 1000
+        })
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.json().catch(() => ({}));
+        console.error('OpenAI API Error:', errorBody);
+        if (response.status === 401) {
+          throw new Error('APIキーが無効です。設定を確認してください。');
+        }
+        throw new Error(`API Error: ${response.status} - ${errorBody.error?.message || 'Unknown error'}`);
+      }
+
+      const data = await response.json();
+
+      if (!data.choices || data.choices.length === 0) {
+        throw new Error('AIからの応答がありませんでした');
+      }
+
+      return data.choices[0].message.content;
+    }
+
+    // Generate new problem
+    async function generateProblem() {
+      if (gameState.isLoading) return;
+
+      gameState.isLoading = true;
+      elements.startBtn.disabled = true;
+      const originalText = elements.startBtn.innerHTML;
+      elements.startBtn.innerHTML = '生成中<span class="loading-dots"><span></span><span></span><span></span></span>';
+
+      try {
+        const diffConfig = difficultyConfig[gameState.difficulty];
+        const prompt = `あなたは「ウミガメのスープ」（水平思考クイズ）の出題者です。
+以下の条件で新しい問題を1つ作成してください：
+
+${diffConfig.prompt}
+
+【共通条件】
+- 一見不可解で興味を引く状況を提示
+- 論理的に解決可能な謎
+- 「はい」「いいえ」の質問で真相に辿り着ける
+- 日本語で自然な文章
+- ユニークで創造的な設定
+
+以下のJSON形式で回答してください：
+{
+  "problem": "問題文（不可解な状況の描写）",
+  "answer": "真相（なぜその状況が起きたのかの説明）"
+}
+
+JSONのみを出力してください。`;
+
+        const response = await callOpenAI(prompt, 'あなたは創造的な水平思考クイズの作家です。');
+
+        const jsonMatch = response.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) {
+          throw new Error('AIの応答形式が不正です');
+        }
+
+        const parsed = JSON.parse(jsonMatch[0]);
+        gameState.problem = parsed.problem;
+        gameState.answer = parsed.answer;
+        gameState.questionCount = 0;
+        gameState.yesCount = 0;
+        gameState.noCount = 0;
+        gameState.history = [];
+
+        elements.problemText.textContent = gameState.problem;
+        elements.questionCount.textContent = '0';
+        elements.historyList.innerHTML = '';
+
+        showScreen('game');
+      } catch (error) {
+        showToast('問題の生成に失敗: ' + error.message);
+        console.error(error);
+      } finally {
+        gameState.isLoading = false;
+        elements.startBtn.disabled = false;
+        elements.startBtn.innerHTML = originalText;
+      }
+    }
+
+    // Process question
+    async function processQuestion(question, isGuess = false) {
+      if (gameState.isLoading || !question.trim()) return;
+
+      gameState.isLoading = true;
+      elements.sendBtn.disabled = true;
+      elements.questionInput.disabled = true;
+
+      try {
+        const prompt = isGuess ?
+          `あなたは「ウミガメのスープ」の出題者です。
+
+【問題】
+${gameState.problem}
+
+【真相】
+${gameState.answer}
+
+【プレイヤーの推理】
+${question}
+
+プレイヤーの推理が真相と概ね一致しているか判定してください。
+完全に同じでなくても、核心的な部分が合っていれば正解とします。
+
+以下のJSON形式で回答：
+{
+  "isCorrect": true または false,
+  "feedback": "正解の場合は祝福の言葉、不正解の場合は「もう少し質問を重ねてみましょう」という励まし"
+}`
+          :
+          `あなたは「ウミガメのスープ」の出題者です。
+
+【問題】
+${gameState.problem}
+
+【真相】
+${gameState.answer}
+
+【プレイヤーの質問】
+${question}
+
+この質問に対して、真相を踏まえて回答してください。
+
+回答は必ず以下のいずれか：
+- 「はい」- 質問の内容が真相において正しい場合
+- 「いいえ」- 質問の内容が真相において正しくない場合  
+- 「どちらとも言えません」- 真相と関係ない、または判断できない場合
+
+以下のJSON形式で回答：
+{
+  "answer": "はい" または "いいえ" または "どちらとも言えません",
+  "comment": "必要に応じて簡潔な補足（オプション）"
+}`;
+
+        const response = await callOpenAI(prompt, 'あなたは公正で論理的なクイズの出題者です。');
+
+        const jsonMatch = response.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) {
+          throw new Error('AIの応答形式が不正です');
+        }
+
+        const parsed = JSON.parse(jsonMatch[0]);
+
+        if (isGuess) {
+          if (parsed.isCorrect) {
+            showResult(true);
+          } else {
+            addHistoryItem(question, '不正解', 'maybe');
+            showToast(parsed.feedback || 'もう少し質問を重ねてみましょう！');
+          }
+        } else {
+          gameState.questionCount++;
+          elements.questionCount.textContent = gameState.questionCount;
+
+          let answerType = 'maybe';
+          let displayAnswer = parsed.answer;
+
+          if (parsed.answer.includes('はい')) {
+            answerType = 'yes';
+            gameState.yesCount++;
+            displayAnswer = 'はい';
+          } else if (parsed.answer.includes('いいえ')) {
+            answerType = 'no';
+            gameState.noCount++;
+            displayAnswer = 'いいえ';
+          } else {
+            displayAnswer = 'どちらとも言えません';
+          }
+
+          addHistoryItem(question, displayAnswer, answerType);
+        }
+
+        elements.questionInput.value = '';
+      } catch (error) {
+        showToast('回答の取得に失敗: ' + error.message);
+        console.error(error);
+      } finally {
+        gameState.isLoading = false;
+        elements.sendBtn.disabled = false;
+        elements.questionInput.disabled = false;
+        elements.questionInput.focus();
+      }
+    }
+
+    // Add history item
+    function addHistoryItem(question, answer, type) {
+      const item = document.createElement('div');
+      item.className = 'history-item';
+      item.innerHTML = `
+        <div class="history-q">${escapeHtml(question)}</div>
+        <div class="history-a ${type}">${answer}</div>
+      `;
+      elements.historyList.insertBefore(item, elements.historyList.firstChild);
+      gameState.history.push({ question, answer, type });
+    }
+
+    // Get hint
+    async function getHint() {
+      if (gameState.isLoading) return;
+
+      gameState.isLoading = true;
+      elements.hintBtn.disabled = true;
+      const originalText = elements.hintBtn.innerHTML;
+      elements.hintBtn.innerHTML = '💡 考え中...';
+
+      try {
+        const prompt = `あなたは「ウミガメのスープ」の出題者です。
+
+【問題】
+${gameState.problem}
+
+【真相】
+${gameState.answer}
+
+プレイヤーにヒントを1つ与えてください。
+- 直接答えを言わない
+- 考える方向性を示唆する
+- 1〜2文程度で簡潔に`;
+
+        const response = await callOpenAI(prompt, 'あなたは親切なクイズの出題者です。');
+        showToast(`💡 ヒント: ${response}`, true);
+      } catch (error) {
+        showToast('ヒントの取得に失敗: ' + error.message);
+        console.error(error);
+      } finally {
+        gameState.isLoading = false;
+        elements.hintBtn.disabled = false;
+        elements.hintBtn.innerHTML = originalText;
+      }
+    }
+
+    // Show result
+    function showResult(isCorrect) {
+      elements.resultIcon.textContent = isCorrect ? '🎉' : '🤔';
+      elements.resultTitle.textContent = isCorrect ? '正解！おめでとう！' : '残念...ギブアップ';
+      elements.resultTitle.className = `result-title ${isCorrect ? '' : 'giveup'}`;
+      elements.answerText.textContent = gameState.answer;
+      elements.finalQuestionCount.textContent = gameState.questionCount;
+      elements.yesCount.textContent = gameState.yesCount;
+      elements.noCount.textContent = gameState.noCount;
+      showScreen('result');
+    }
+
+    // Escape HTML
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Event Listeners
+    elements.saveApiKeyBtn?.addEventListener('click', saveApiKey);
+
+    elements.apiKeyInput?.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') saveApiKey();
+    });
+
+    elements.settingsBtn?.addEventListener('click', () => {
+      elements.apiKeyInput.value = gameState.apiKey;
+      showScreen('setup');
+    });
+
+    document.querySelectorAll('.difficulty-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        gameState.difficulty = btn.dataset.difficulty;
+      });
+    });
+
+    elements.startBtn?.addEventListener('click', generateProblem);
+
+    elements.sendBtn?.addEventListener('click', () => {
+      processQuestion(elements.questionInput.value);
+    });
+
+    elements.questionInput?.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        processQuestion(elements.questionInput.value);
+      }
+    });
+
+    elements.hintBtn?.addEventListener('click', getHint);
+
+    elements.answerBtn?.addEventListener('click', () => {
+      const guess = prompt('真相を推理してください：');
+      if (guess && guess.trim()) {
+        processQuestion(guess, true);
+      }
+    });
+
+    elements.giveupBtn?.addEventListener('click', () => {
+      if (confirm('ギブアップしますか？正解が表示されます。')) {
+        showResult(false);
+      }
+    });
+
+    elements.nextBtn?.addEventListener('click', () => {
+      showScreen('start');
+    });
+
+    // Initialize
+    initBgAnimation();
+    loadApiKey();
+  </script>
 </body>
 
 </html>

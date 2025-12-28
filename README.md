@@ -9,28 +9,28 @@ AIが無限に生成する水平思考クイズ「ウミガメのスープ」を
 - **真相の判定**: プレイヤーの推理が真相の核心を突いているか、AIが柔軟に判定します。
 - **モダンなUI**: ガラスモーフィズムを採用した、ダークで洗練されたデザイン。
 - **多段階の難易度**: 初級・中級・上級から選択可能。
+- **シンプル構成**: 単一のHTMLファイルで動作。ビルド不要。
+
+## 使い方
+
+1. `index.html` をブラウザで開くか、任意のWebサーバーでホストします。
+2. 初回起動時にOpenAI APIキーを入力します。
+   - [OpenAI Platform](https://platform.openai.com/api-keys)でAPIキーを取得できます。
+   - 入力したキーはブラウザのlocalStorageに保存されます（外部に送信されません）。
+3. 難易度を選んでゲームスタート！
+
+## セキュリティについて
+
+- APIキーはユーザーのブラウザ内（localStorage）にのみ保存されます。
+- キーはブラウザからOpenAIのサーバーに直接送信されます（第三者のサーバーを経由しません）。
+- ソースコードにAPIキーは含まれていません。
 
 ## 技術スタック
 
-- **Frontend**: Vite, Vanilla JavaScript, CSS3
+- **Frontend**: Vanilla HTML/CSS/JavaScript（ビルドツール不要）
 - **AI**: OpenAI API (GPT-4o)
-
-## セットアップ
-
-1. リポジトリをクローンまたはダウンロードします。
-2. `.env` ファイルを作成し、OpenAI APIキーを設定します。
-   ```env
-   VITE_OPENAI_API_KEY=your_api_key_here
-   ```
-3. 依存関係をインストールします。
-   ```bash
-   npm install
-   ```
-4. 開発サーバーを起動します。
-   ```bash
-   npm run dev
-   ```
 
 ## ライセンス
 
 MIT License
+

@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>エターナルウミガメのスープ - 無限水平思考クイズ</title>
   <meta name="description" content="AIが無限に生成する水平思考クイズ「ウミガメのスープ」。質問を重ねて真相を解き明かそう！">
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐢</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -155,8 +157,7 @@
       }
     }
 
-    /* Setup & Start Screen */
-    #setup-screen,
+    /* Start Screen */
     #start-screen {
       justify-content: center;
       align-items: center;
@@ -201,54 +202,6 @@
       color: var(--text-secondary);
       margin-bottom: 30px;
       line-height: 1.8;
-    }
-
-    /* API Key Section */
-    .api-key-section {
-      margin-bottom: 24px;
-      text-align: left;
-    }
-
-    .api-key-label {
-      display: block;
-      font-size: 0.9rem;
-      color: var(--accent);
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-
-    .api-key-input {
-      width: 100%;
-      background: var(--glass);
-      border: 2px solid var(--glass-border);
-      border-radius: 12px;
-      padding: 14px 16px;
-      font-size: 1rem;
-      color: var(--text-primary);
-      font-family: monospace;
-      transition: all 0.3s ease;
-    }
-
-    .api-key-input:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 20px var(--accent-glow);
-    }
-
-    .api-key-hint {
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-      margin-top: 12px;
-      line-height: 1.6;
-    }
-
-    .api-key-hint a {
-      color: var(--accent);
-      text-decoration: none;
-    }
-
-    .api-key-hint a:hover {
-      text-decoration: underline;
     }
 
     /* Difficulty Selector */
@@ -307,8 +260,7 @@
       letter-spacing: 2px;
     }
 
-    .start-btn,
-    .primary-btn {
+    .start-btn {
       background: linear-gradient(135deg, var(--accent), #0099cc);
       border: none;
       padding: 18px 48px;
@@ -322,35 +274,15 @@
       font-family: inherit;
     }
 
-    .start-btn:hover:not(:disabled),
-    .primary-btn:hover:not(:disabled) {
+    .start-btn:hover:not(:disabled) {
       transform: translateY(-3px) scale(1.05);
       box-shadow: 0 8px 40px var(--accent-glow);
     }
 
-    .start-btn:disabled,
-    .primary-btn:disabled {
+    .start-btn:disabled {
       opacity: 0.5;
       cursor: not-allowed;
       transform: none;
-    }
-
-    .settings-btn {
-      background: transparent;
-      border: 2px solid var(--glass-border);
-      padding: 12px 24px;
-      font-size: 1rem;
-      color: var(--text-secondary);
-      border-radius: 50px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-family: inherit;
-      margin-top: 16px;
-    }
-
-    .settings-btn:hover {
-      border-color: var(--accent);
-      color: var(--text-primary);
     }
 
     /* Game Screen */
@@ -584,9 +516,14 @@
       font-family: inherit;
     }
 
-    .action-btn:hover {
+    .action-btn:hover:not(:disabled) {
       border-color: var(--accent);
       background: rgba(0, 217, 255, 0.1);
+    }
+
+    .action-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
 
     .action-btn.primary {
@@ -595,7 +532,7 @@
       color: white;
     }
 
-    .action-btn.primary:hover {
+    .action-btn.primary:hover:not(:disabled) {
       transform: translateY(-2px);
       box-shadow: 0 4px 20px rgba(168, 85, 247, 0.4);
     }
@@ -715,6 +652,7 @@
     .loading-dots {
       display: inline-flex;
       gap: 4px;
+      margin-left: 8px;
     }
 
     .loading-dots span {
@@ -744,6 +682,93 @@
       40% {
         transform: scale(1);
       }
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      z-index: 100;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--bg-secondary);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 32px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .modal h3 {
+      font-size: 1.3rem;
+      margin-bottom: 16px;
+      color: var(--accent);
+    }
+
+    .modal p {
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .modal-input {
+      width: 100%;
+      background: var(--glass);
+      border: 2px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-size: 1rem;
+      color: var(--text-primary);
+      font-family: inherit;
+      margin-bottom: 20px;
+    }
+
+    .modal-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 12px;
+    }
+
+    .modal-btn {
+      flex: 1;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: inherit;
+      font-size: 1rem;
+    }
+
+    .modal-btn.cancel {
+      background: var(--glass);
+      border: 2px solid var(--glass-border);
+      color: var(--text-secondary);
+    }
+
+    .modal-btn.confirm {
+      background: linear-gradient(135deg, var(--accent), #0099cc);
+      border: none;
+      color: var(--bg-primary);
     }
 
     /* Responsive */
@@ -795,34 +820,22 @@
   <!-- Toast Notification -->
   <div class="toast" id="toast"></div>
 
-  <div class="container">
-    <!-- API Key Setup Screen -->
-    <div class="screen active" id="setup-screen">
-      <div class="glass-card">
-        <div class="logo">
-          <div class="turtle">🐢</div>
-        </div>
-        <h1 class="title">エターナル<br>ウミガメのスープ</h1>
-        <p class="subtitle">
-          AIが無限に生み出す水平思考クイズ。<br>
-          プレイするにはOpenAI APIキーが必要です。
-        </p>
-
-        <div class="api-key-section">
-          <label class="api-key-label" for="api-key-input">🔑 OpenAI APIキー</label>
-          <input type="password" class="api-key-input" id="api-key-input" placeholder="sk-...">
-          <p class="api-key-hint">
-            <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">OpenAI</a>でAPIキーを取得できます。<br>
-            キーはブラウザに安全に保存され、外部に送信されません。
-          </p>
-        </div>
-
-        <button class="start-btn" id="save-api-key-btn">💾 保存してゲームへ</button>
+  <!-- Guess Modal -->
+  <div class="modal-overlay" id="guess-modal">
+    <div class="modal">
+      <h3>✨ 真相を推理する</h3>
+      <p>真相だと思う内容を入力してください。核心が合っていれば正解です！</p>
+      <textarea class="modal-input" id="guess-input" rows="4" placeholder="例：男は実は...だった"></textarea>
+      <div class="modal-buttons">
+        <button class="modal-btn cancel" id="guess-cancel">キャンセル</button>
+        <button class="modal-btn confirm" id="guess-submit">判定する</button>
       </div>
     </div>
+  </div>
 
+  <div class="container">
     <!-- Start Screen -->
-    <div class="screen" id="start-screen">
+    <div class="screen active" id="start-screen">
       <div class="glass-card">
         <div class="logo">
           <div class="turtle">🐢</div>
@@ -842,7 +855,6 @@
         </div>
 
         <button class="start-btn" id="start-btn">🎮 ゲームスタート</button>
-        <button class="settings-btn" id="settings-btn">⚙️ APIキー設定</button>
       </div>
     </div>
 
@@ -859,20 +871,18 @@
       </div>
 
       <div class="input-area">
-        <input type="text" class="question-input" id="question-input" placeholder="質問を入力してください（例：その人は男性ですか？）">
+        <input type="text" class="question-input" id="question-input" placeholder="質問を入力（例：その人は男性ですか？）">
         <button class="send-btn" id="send-btn">🚀</button>
       </div>
 
       <div class="history-section">
         <div class="history-label">💬 質問履歴</div>
-        <div class="history-list" id="history-list">
-          <!-- History items will be added here -->
-        </div>
+        <div class="history-list" id="history-list"></div>
       </div>
 
       <div class="action-buttons">
         <button class="action-btn" id="hint-btn">💡 ヒント</button>
-        <button class="action-btn primary" id="answer-btn">✨ 正解を推理する</button>
+        <button class="action-btn primary" id="answer-btn">✨ 正解を推理</button>
         <button class="action-btn" id="giveup-btn">🏳️ ギブアップ</button>
       </div>
     </div>
@@ -909,13 +919,11 @@
   </div>
 
   <script>
-    // API Configuration
-    const API_URL = 'https://api.openai.com/v1/chat/completions';
-    const STORAGE_KEY = 'umigame_api_key';
+    // API endpoint (Vercel serverless function)
+    const API_ENDPOINT = '/api/chat';
 
     // Game State
     let gameState = {
-      apiKey: '',
       problem: '',
       answer: '',
       questionCount: 0,
@@ -956,16 +964,12 @@
 
     // DOM Elements
     const screens = {
-      setup: document.getElementById('setup-screen'),
       start: document.getElementById('start-screen'),
       game: document.getElementById('game-screen'),
       result: document.getElementById('result-screen')
     };
 
     const elements = {
-      apiKeyInput: document.getElementById('api-key-input'),
-      saveApiKeyBtn: document.getElementById('save-api-key-btn'),
-      settingsBtn: document.getElementById('settings-btn'),
       startBtn: document.getElementById('start-btn'),
       problemText: document.getElementById('problem-text'),
       questionInput: document.getElementById('question-input'),
@@ -982,7 +986,11 @@
       yesCount: document.getElementById('yes-count'),
       noCount: document.getElementById('no-count'),
       nextBtn: document.getElementById('next-btn'),
-      toast: document.getElementById('toast')
+      toast: document.getElementById('toast'),
+      guessModal: document.getElementById('guess-modal'),
+      guessInput: document.getElementById('guess-input'),
+      guessCancel: document.getElementById('guess-cancel'),
+      guessSubmit: document.getElementById('guess-submit')
     };
 
     // Toast notification
@@ -991,7 +999,7 @@
       elements.toast.className = 'toast show' + (isSuccess ? ' success' : '');
       setTimeout(() => {
         elements.toast.classList.remove('show');
-      }, 3000);
+      }, 4000);
     }
 
     // Initialize background animation
@@ -1017,71 +1025,20 @@
       screens[screenName]?.classList.add('active');
     }
 
-    // Load API key from storage
-    function loadApiKey() {
-      const savedKey = localStorage.getItem(STORAGE_KEY);
-      if (savedKey) {
-        gameState.apiKey = savedKey;
-        showScreen('start');
-      } else {
-        showScreen('setup');
-      }
-    }
-
-    // Save API key
-    function saveApiKey() {
-      const key = elements.apiKeyInput.value.trim();
-      if (!key) {
-        showToast('APIキーを入力してください');
-        return;
-      }
-      if (!key.startsWith('sk-')) {
-        showToast('無効なAPIキー形式です（sk-で始まる必要があります）');
-        return;
-      }
-      gameState.apiKey = key;
-      localStorage.setItem(STORAGE_KEY, key);
-      showToast('APIキーを保存しました！', true);
-      showScreen('start');
-    }
-
-    // Call OpenAI API
-    async function callOpenAI(prompt, systemPrompt = '') {
-      if (!gameState.apiKey) {
-        throw new Error('APIキーが設定されていません');
-      }
-
-      const messages = [];
-      if (systemPrompt) {
-        messages.push({ role: 'system', content: systemPrompt });
-      }
-      messages.push({ role: 'user', content: prompt });
-
-      const response = await fetch(API_URL, {
+    // Call API
+    async function callAPI(messages) {
+      const response = await fetch(API_ENDPOINT, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${gameState.apiKey}`
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o',
-          messages: messages,
-          temperature: 0.8,
-          max_tokens: 1000
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages })
       });
 
       if (!response.ok) {
-        const errorBody = await response.json().catch(() => ({}));
-        console.error('OpenAI API Error:', errorBody);
-        if (response.status === 401) {
-          throw new Error('APIキーが無効です。設定を確認してください。');
-        }
-        throw new Error(`API Error: ${response.status} - ${errorBody.error?.message || 'Unknown error'}`);
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.error || 'サーバーエラーが発生しました');
       }
 
       const data = await response.json();
-
       if (!data.choices || data.choices.length === 0) {
         throw new Error('AIからの応答がありませんでした');
       }
@@ -1120,12 +1077,14 @@ ${diffConfig.prompt}
 
 JSONのみを出力してください。`;
 
-        const response = await callOpenAI(prompt, 'あなたは創造的な水平思考クイズの作家です。');
+        const messages = [
+          { role: 'system', content: 'あなたは創造的な水平思考クイズの作家です。' },
+          { role: 'user', content: prompt }
+        ];
 
+        const response = await callAPI(messages);
         const jsonMatch = response.match(/\{[\s\S]*\}/);
-        if (!jsonMatch) {
-          throw new Error('AIの応答形式が不正です');
-        }
+        if (!jsonMatch) throw new Error('AIの応答形式が不正です');
 
         const parsed = JSON.parse(jsonMatch[0]);
         gameState.problem = parsed.problem;
@@ -1157,6 +1116,9 @@ JSONのみを出力してください。`;
       gameState.isLoading = true;
       elements.sendBtn.disabled = true;
       elements.questionInput.disabled = true;
+      elements.hintBtn.disabled = true;
+      elements.answerBtn.disabled = true;
+      elements.giveupBtn.disabled = true;
 
       try {
         const prompt = isGuess ?
@@ -1204,12 +1166,14 @@ ${question}
   "comment": "必要に応じて簡潔な補足（オプション）"
 }`;
 
-        const response = await callOpenAI(prompt, 'あなたは公正で論理的なクイズの出題者です。');
+        const messages = [
+          { role: 'system', content: 'あなたは公正で論理的なクイズの出題者です。' },
+          { role: 'user', content: prompt }
+        ];
 
+        const response = await callAPI(messages);
         const jsonMatch = response.match(/\{[\s\S]*\}/);
-        if (!jsonMatch) {
-          throw new Error('AIの応答形式が不正です');
-        }
+        if (!jsonMatch) throw new Error('AIの応答形式が不正です');
 
         const parsed = JSON.parse(jsonMatch[0]);
 
@@ -1250,6 +1214,9 @@ ${question}
         gameState.isLoading = false;
         elements.sendBtn.disabled = false;
         elements.questionInput.disabled = false;
+        elements.hintBtn.disabled = false;
+        elements.answerBtn.disabled = false;
+        elements.giveupBtn.disabled = false;
         elements.questionInput.focus();
       }
     }
@@ -1289,7 +1256,12 @@ ${gameState.answer}
 - 考える方向性を示唆する
 - 1〜2文程度で簡潔に`;
 
-        const response = await callOpenAI(prompt, 'あなたは親切なクイズの出題者です。');
+        const messages = [
+          { role: 'system', content: 'あなたは親切なクイズの出題者です。' },
+          { role: 'user', content: prompt }
+        ];
+
+        const response = await callAPI(messages);
         showToast(`💡 ヒント: ${response}`, true);
       } catch (error) {
         showToast('ヒントの取得に失敗: ' + error.message);
@@ -1321,17 +1293,6 @@ ${gameState.answer}
     }
 
     // Event Listeners
-    elements.saveApiKeyBtn?.addEventListener('click', saveApiKey);
-
-    elements.apiKeyInput?.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') saveApiKey();
-    });
-
-    elements.settingsBtn?.addEventListener('click', () => {
-      elements.apiKeyInput.value = gameState.apiKey;
-      showScreen('setup');
-    });
-
     document.querySelectorAll('.difficulty-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
@@ -1355,9 +1316,26 @@ ${gameState.answer}
     elements.hintBtn?.addEventListener('click', getHint);
 
     elements.answerBtn?.addEventListener('click', () => {
-      const guess = prompt('真相を推理してください：');
-      if (guess && guess.trim()) {
+      elements.guessInput.value = '';
+      elements.guessModal.classList.add('active');
+      elements.guessInput.focus();
+    });
+
+    elements.guessCancel?.addEventListener('click', () => {
+      elements.guessModal.classList.remove('active');
+    });
+
+    elements.guessSubmit?.addEventListener('click', () => {
+      const guess = elements.guessInput.value.trim();
+      if (guess) {
+        elements.guessModal.classList.remove('active');
         processQuestion(guess, true);
+      }
+    });
+
+    elements.guessModal?.addEventListener('click', (e) => {
+      if (e.target === elements.guessModal) {
+        elements.guessModal.classList.remove('active');
       }
     });
 
@@ -1373,7 +1351,6 @@ ${gameState.answer}
 
     // Initialize
     initBgAnimation();
-    loadApiKey();
   </script>
 </body>
 
